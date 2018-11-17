@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<title>夜間的歌</title>
+		<meta name="viewport" content="width=device-width" />
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.6/themes/default/style.min.css" />
+		<style>
+		html, body { background:#ebebeb; font-size:10px; font-family:Verdana; margin:0; padding:0; }
+		#container { min-width:320px; margin:0px auto 0 auto; background:white; border-radius:0px; padding:0px; overflow:hidden; }
+		#tree { float:left; min-width:100px; border-right:1px solid silver; overflow:auto; padding:0px 0; }
+		#data { margin-left:100px; }
+		#data textarea { margin:0; padding:0; height:100%; width:100%; border:0; background:white; display:block; line-height:18px; resize:none; }
+		#data, #code { font: normal normal normal 12px/18px 'Consolas', monospace !important; }
+
+		#tree .folder { background:url('./file_sprite.png') right bottom no-repeat; }
+		#tree .file { background:url('./file_sprite.png') 0 0 no-repeat; }
+		#tree .file-pdf { background-position: -32px 0 }
+		#tree .file-as { background-position: -36px 0 }
+		#tree .file-c { background-position: -72px -0px }
+		#tree .file-iso { background-position: -108px -0px }
+		#tree .file-htm, #tree .file-html, #tree .file-xml, #tree .file-xsl { background-position: -126px -0px }
+		#tree .file-cf { background-position: -162px -0px }
+		#tree .file-cpp { background-position: -216px -0px }
+		#tree .file-cs { background-position: -236px -0px }
+		#tree .file-sql { background-position: -272px -0px }
+		#tree .file-xls, #tree .file-xlsx { background-position: -362px -0px }
+		#tree .file-h { background-position: -488px -0px }
+		#tree .file-crt, #tree .file-pem, #tree .file-cer { background-position: -452px -18px }
+		#tree .file-php { background-position: -108px -18px }
+		#tree .file-jpg, #tree .file-jpeg, #tree .file-png, #tree .file-gif, #tree .file-bmp { background-position: -126px -18px }
+		#tree .file-ppt, #tree .file-pptx { background-position: -144px -18px }
+		#tree .file-rb { background-position: -180px -18px }
+		#tree .file-text, #tree .file-txt, #tree .file-md, #tree .file-log, #tree .file-htaccess { background-position: -254px -18px }
+		#tree .file-doc, #tree .file-docx { background-position: -362px -18px }
+		#tree .file-zip, #tree .file-gz, #tree .file-tar, #tree .file-rar { background-position: -416px -18px }
+		#tree .file-js { background-position: -434px -18px }
+		#tree .file-css { background-position: -144px -0px }
+		#tree .file-fla { background-position: -398px -0px }
+
+		.container {
+			float:right;
+			display: inline-block;
+			cursor: pointer;
+		}
+
+		.bar1, .bar2, .bar3 {
+			width: 35px;
+			height: 5px;
+			background-color: #333;
+			margin: 6px 0;
+			transition: 0.4s;
+		}
+
+		.change .bar1 {
+			-webkit-transform: rotate(-45deg) translate(-9px, 6px);
+			transform: rotate(-45deg) translate(-9px, 6px);
+		}
+
+		.change .bar2 {opacity: 0;}
+
+		.change .bar3 {
+			-webkit-transform: rotate(45deg) translate(-8px, -8px);
+			transform: rotate(45deg) translate(-8px, -8px);
+		}
+		</style>
+	</head>
+	<body>
+		<div id="container" role="main">
+			<div class="container" onclick="onClickmenu(this)">
+				<div class="bar1"></div>
+				<div class="bar2"></div>
+				<div class="bar3"></div>
+			</div>
+			<div id="tree">
+			</div>
+			<div id="data">
+				<div class="content code" style="display:none;"><textarea id="code" readonly="readonly"></textarea></div>
+				<div class="content folder" style="display:none;"></div>
+				<div class="content image" style="display:none; position:relative;"><img src="" alt="" style="display:block; position:absolute; left:50%; top:50%; padding:0; max-height:90%; max-width:90%;" /></div>
+				<!-- <div class="content default" style="text-align:center;">Select a file from the tree.</div> -->
+				<pre id="content" style="white-space:pre-wrap;height:90%; overflow:scroll;"></pre>
+			</div>
+		</div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.6/jstree.min.js"></script>
+		<script>
+			var aud = new Audio()
+			$(function () {
+				$(window).resize(function () {
+					var h = Math.max($(window).height() - 0, 420);
+					$('#container, #data, #tree, #data .content').height(h).filter('.default').css('lineHeight', h + 'px');
+				}).resize();
+
+				$('#tree')
+					.jstree({
+						'core' : {
+							'data' : {
+								"url" : "./yejiandege.json",
+								"dataType" : "json" // needed only if you do not supply JSON headers
+							}
+						},
+						"types" : {
+							// 'default' : { 'icon' : 'folder' },
+							'file' : { 'valid_children' : [], 'icon' : 'jstree-file' }
+						},
+						"plugins" : [ "contextmenu", "dnd", "search", "state", "types", "wholerow" ]
+					})
+					.on('changed.jstree', function (e, data = {}) {
+						let node = data.node || {}
+						let { original = {}, download } = node
+						console.log(node, data)
+						if (original.wav) {
+							aud.src = original.wav
+							aud.play()
+						} else {
+							aud.pause()
+						}
+
+						if (original.download) {
+							window.open(original.download)
+						}
+						$('#content').html(original.content).show();
+					});
+			});
+			function onClickmenu(x) {
+				x.classList.toggle("change");
+				$('#tree').toggle()
+			}
+		</script>
+	</body>
+</html>
